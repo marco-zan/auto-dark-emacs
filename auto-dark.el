@@ -71,7 +71,7 @@ if left as such.  Only change this value if you know what you're
 doing!"
   :group 'auto-dark
   :type 'symbol
-  :options '(applescript osascript dbus powershell winreg))
+  :options '(applescript osascript dbus xsettingsd powershell winreg))
 
 (defvar auto-dark--last-dark-mode-state 'unknown)
 
@@ -94,6 +94,11 @@ end tell")))
   "Invoke applescript using Emacs using external shell command;
 this is less efficient, but works for non-GUI Emacs."
   (string-equal "true" (string-trim (shell-command-to-string "osascript -e 'tell application \"System Events\" to tell appearance preferences to return dark mode'"))))
+
+(defun auto-dark--is-dark-mode-xsettingsd ()
+  "Invoke applescript using Emacs using external shell command;
+this is less efficient, but works for non-GUI Emacs."
+  (string-equal "1" (string-trim (shell-command-to-string "[[ $(cat $HOME/.xsettingsd) == *\"Dark\"* ]] && echo 1 || echo 2"))))
 
 (defun auto-dark--is-dark-mode-dbus ()
   "Use Emacs built-in D-Bus function to determine if dark theme is enabled."
@@ -133,6 +138,8 @@ HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize \
      (auto-dark--is-dark-mode-osascript))
     ('dbus
      (auto-dark--is-dark-mode-dbus))
+    ('xsettingsd
+     (auto-dark--is-dark-mode-xsettingsd))
     ('powershell
      (auto-dark--is-dark-mode-powershell))
     ('winreg
